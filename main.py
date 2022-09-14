@@ -88,3 +88,5 @@ with model_training:
         st.text("The message was reviewed as positive!")
     else:
         st.text("The message was reviewed as negative!")
+
+    st.text("Thanks for using the app!")
