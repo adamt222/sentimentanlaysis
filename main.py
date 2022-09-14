@@ -9,29 +9,24 @@ header = st.container()
 dataset = st.container()
 model_training = st.container()
 
-with header:
-    st.title("Welcome to this sentiment analysis app !")
-    st.text("In this project I will train a model to try and figure the sentiment of some text out")
+vocab_size = 10000
+max_length = 100
+embedding_dim = 64
+trunc_type = 'post'
+padding_type = 'post'
+oov_tok = '<OOV>'
+training_size = 4000
 
-with dataset:
-    review_data = pd.read_csv('data/NewIMDBReviews.csv')
-    data = pd.read_csv('data/IMDBDataset.csv')
-    sentiment_dist = pd.DataFrame(data['sentiment'].value_counts())
-    st.bar_chart(sentiment_dist)
+@st.cache
+def get_data(filename):
+    data = pd.read_csv(filename)
 
-with model_training:
-    st.header("Time to train the model!")
-    sel_col = st.columns(1)
+    return data
+
+@st.cache(allow_output_mutation=True)
+def train_model():
     text = list(review_data['text'])
     labels = list(review_data['sentiment'])
-
-    vocab_size = 10000
-    max_length = 100
-    embedding_dim = 64
-    trunc_type = 'post'
-    padding_type = 'post'
-    oov_tok = '<OOV>'
-    training_size = 4000
 
     training_sentences = text[0:training_size]
     training_labels = labels[0:training_size]
@@ -67,11 +62,29 @@ with model_training:
     num_epochs = 10
     history = model.fit(training_padded, training_labels, epochs=num_epochs, validation_data=(testing_padded, testing_labels), verbose=2)
 
+    return (model, tokenizer)
+
+with header:
+    st.title("Welcome to this sentiment analysis app !")
+    st.text("In this project I will train a model to try and figure the sentiment of some text out")
+
+with dataset:
+    review_data = get_data('data/NewIMDBReviews.csv')
+    data = get_data('data/IMDBDataset.csv')
+    sentiment_dist = pd.DataFrame(data['sentiment'].value_counts())
+    st.bar_chart(sentiment_dist)
+
+with model_training:
+    st.header("Time to train the model!")
+    sel_col = st.columns(1)
+    mytuple = train_model()
+    model = mytuple[0]
+    tokenizer = mytuple[1]
     input_text = st.text_input("Please type a message!", "I love this app")
     new_sentence = [input_text]
     sequences = tokenizer.texts_to_sequences(new_sentence)
     padded = pad_sequences(sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-    if model.predict(padded)[0][0] > 0.5:
+    if model.predict(padded)[0][0] >= 0.5:
         st.text("The message was reviewed as positive!")
     else:
         st.text("The message was reviewed as negative!")
