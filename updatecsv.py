@@ -1,9 +1,9 @@
-import csv
-with open('data/IMDBDataset.csv', 'rt', encoding="ascii") as inp, open('data/IMDBDataset_edit.csv', 'wt') as out:
-    writer = csv.writer(out)
-    count = 0
-    for row in csv.reader(inp):
-        if count < 5000:
-            writer.writerow(row)
-        count += 1
-    print(count)
+import pandas as pd
+
+df = pd.read_csv('data/IMDBDataset.csv')
+
+df['sentiment'] = df['sentiment'].replace({'positive': 1})
+
+df['sentiment'] = df['sentiment'].replace({'negative': 0})
+
+df.to_csv("NewIMDBReviews.csv", index=False)
