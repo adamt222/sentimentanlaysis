@@ -65,7 +65,7 @@ def train_model():
     return (model, tokenizer)
 
 with header:
-    st.title("Welcome to this sentiment analysis app !")
+    st.title("Welcome to this sentiment analysis app by Adam T")
     st.text("In this project I will train a model to try and figure the sentiment of some text out")
 
 with dataset:
